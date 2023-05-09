@@ -52,6 +52,7 @@ export interface ChessboardInterface {
   ) => void;
   flashRing: (success: boolean) => void;
   previewMove: (m: Move | string | null) => void;
+  playSound: () => void;
   reversePreviewMove: () => void;
   animatePreviewMove: () => void;
   stepPreviewMove: () => void;
@@ -158,6 +159,7 @@ export const createChessboardInterface = (): [
       },
     });
   let pendingState: ChessboardViewState | null = null;
+  const audio = (typeof Audio !== "undefined" ? new Audio("sound/Move.ogg") : undefined);
   const set = <T,>(s: (s: ChessboardViewState) => T) => {
     if (pendingState) {
       return s(pendingState);
@@ -246,6 +248,9 @@ export const createChessboardInterface = (): [
           s._animatePosition = createChessProxy(new Chess(s.position.fen()));
           s.animationQueue = moves;
           chessboardInterface.stepAnimationQueue();
+        } else {
+            // play sound only if the was no animation
+            chessboardInterface.playSound();
         }
         pos.move(m);
         if (moveObject) {
@@ -258,6 +263,11 @@ export const createChessboardInterface = (): [
         } else {
           console.log("This move wasn't valid!", m);
         }
+      });
+    },
+    playSound: () => {
+      set((s: ChessboardViewState) => {
+		audio.play();
       });
     },
     reversePreviewMove: () => {
